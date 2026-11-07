@@ -2,6 +2,10 @@
 
 Newest first. Append here; this is where the next session starts.
 
+## 2026-11-07 (night), v0.1.5, the player's one big button (from Eli's first Athletic Lab session)
+
+Eli finished a stretch session with nothing logged because the only big button was "Skip to next" and the set boxes were small and below the fold. Same player here, same fix: one bright button under the drawing ("▶ Start the 30 second timer" / "✓ Did it (set 1 of 2)"), the countdown in that same spot, a "✓ Done" flash and automatic move to the next exercise, a quiet "Skip this one", and the elapsed clock marked "total". Details in Athletic Lab's DECISIONS, v0.6.1.
+
 ## 2026-11-07 (evening), v0.1.3 and v0.1.4, the icon
 - The band-and-bar icon read as something else entirely on his phone. A hand-drawn flexed arm was worse ("wtf is this"). v0.1.4 is simply the flexed-arm emoji, rendered from Noto Color Emoji (Google's open-source emoji font, SIL Open Font License) on the slate square. Easy, as asked. iOS caches home-screen icons, so the old one stays until the app is removed from the home screen and added again.
 

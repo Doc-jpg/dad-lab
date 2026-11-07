@@ -4,7 +4,7 @@ Carried over from Dugout Lab and Athletic Lab (Deren: "blend comprehensiveness, 
 
 1. **Twenty seconds to a plan.** The check-in defaults to "a normal day": sleep, energy, stress, soreness, time. Tap Save and the day is picked. Other activity is a chip.
 2. **There is always something.** No verdict is "nothing". Red gets the floor (breathing, maybe a walk). The point of the app is the chain, and a five-minute day keeps it.
-3. **One tap per set.** A set is one big button; the rep count sits next to it with chips for 15 to 40. Holds count themselves down. Rest timers can be skipped.
+3. **The big button is the instruction.** Under the drawing there is always exactly one bright thing to tap: start the timer, or did it. The app says Done and moves on by itself; skipping is a quiet option, never the default. Holds count themselves down; rest timers can be skipped.
 4. **Depth behind a fold, never gone.** Every move carries steps, cues, mistakes, skip conditions, versions, links and history; the player shows the drawing and the cues, and the rest opens on demand.
 5. **Say why, every time.** The day card lists its reasons; every swapped move says what it replaced and why; every band suggestion says what earned it.
 6. **Hard rules never relax.** A sore joint you tapped stays swapped out even when you pick a different day. The app never raises a band on its own. Yellow and orange band days are one set each.

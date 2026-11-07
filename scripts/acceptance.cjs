@@ -90,7 +90,12 @@ const shot = (page, name) => page.screenshot({ path: path.join(shotsDir, `${name
       const restSkip = page.locator('role=button[name="Skip rest"]');
       if (await restSkip.count()) await restSkip.click();
     }
-    if (i < total - 1) await page.click('text=/Next ›|Skip to next ›/');
+    if (i < total - 1) {
+      // After the last set the player flashes Done and moves on by itself; wait for that, else skip.
+      const moved = await page.waitForFunction((n) => /·\s*(\d+) of /.test(document.body.innerText) && Number(document.body.innerText.match(/·\s*(\d+) of /)[1]) === n, i + 2, { timeout: 3000 }).then(() => true).catch(() => false);
+      if (!moved) await page.click('text=/Next ›|Skip this one ›/');
+      await settle(150);
+    }
   }
   expect('band shown on the card', sawBand, true);
   expect('band moves offer a failure toggle and rep chips', sawFailure, true);

@@ -27,6 +27,7 @@ export function WorkoutPage() {
   const [paused, setPaused] = useState(false);
   const [elapsed, setElapsed] = useState(0);
   const [rest, setRest] = useState<number | null>(null);
+  const [flash, setFlash] = useState(false);
   const [hold, setHold] = useState<{ setIdx: number; left: number } | null>(null);
   const [stopOpen, setStopOpen] = useState(false);
   const [finishOpen, setFinishOpen] = useState(false);
@@ -64,7 +65,7 @@ export function WorkoutPage() {
   }, [rest, paused]);
   useEffect(() => {
     if (!hold || paused) return;
-    if (hold.left <= 0) { completeSet(hold.setIdx, { seconds: current?.planned.seconds }); setHold(null); return; }
+    if (hold.left <= 0) { try { (navigator as any).vibrate?.([120, 80, 120]); } catch { /* ignore */ } completeSet(hold.setIdx, { seconds: current?.planned.seconds }); setHold(null); return; }
     const t = window.setTimeout(() => setHold({ ...hold, left: hold.left - 1 }), 1000);
     return () => window.clearTimeout(t);
   }, [hold, paused]);
@@ -89,6 +90,16 @@ export function WorkoutPage() {
     setRepsAdj(null);
     setHold(null);
   }, [exercise?.id]);
+
+  // After the last set of an item: flash Done, then move on by itself (not on the last item).
+  const itemDone = (() => { if (!session || index === null) return false; const it = session.items[index]; if (!it) return false; const need = it.planned.sets * (it.planned.perSide ? 2 : 1); return it.sets.filter((x) => x?.done).length >= need; })();
+  const isLastItem = !!session && index !== null && index === session.items.length - 1;
+  useEffect(() => {
+    if (!itemDone || rest !== null || hold || isLastItem || index === null) return;
+    setFlash(true);
+    const t = window.setTimeout(() => { setFlash(false); setIndex(index + 1); }, 1400);
+    return () => window.clearTimeout(t);
+  }, [itemDone, rest, hold, isLastItem, index]);
 
   if (!session || !me || index === null) return <div className="empty">Opening…</div>;
   if (session.status === 'done' || session.status === 'stopped' || session.status === 'skipped') return <div className="col"><div className="card"><strong>This session is finished.</strong></div><Link className="btn primary block" to={`/sessions/${session.id}`}>See the summary</Link></div>;
@@ -130,6 +141,15 @@ export function WorkoutPage() {
   };
   const setLabel = (i: number) => (planned.perSide ? `${planned.perSide ? (i % 2 === 0 ? 'L' : 'R') : ''} set ${Math.floor(i / 2) + 1}` : `Set ${i + 1}`);
   const isLast = index === session.items.length - 1;
+  const action = (() => {
+        const nextIdx = sets.findIndex((x) => !x?.done) === -1 ? (allDone ? -1 : sets.length) : sets.findIndex((x) => !x?.done);
+        const which = totalSets > 1 && nextIdx >= 0 ? ` (${setLabel(nextIdx).toLowerCase()} of ${totalSets})` : '';
+        if (flash || allDone) return <div className="banner green" style={{ textAlign: 'center', fontWeight: 800, fontSize: 18 }}>✓ Done{isLastItem ? '. Tap Finish workout.' : flash ? '. Next one coming up…' : ''}</div>;
+        if (hold) return <div className="center" style={{ padding: '6px 0' }}><div className="small muted">{exercise.area === 'breathing' ? 'Breathe' : 'Keep going'}</div><div className="timer">{hold.left}</div><button className="btn mt" onClick={() => { completeSet(hold.setIdx); setHold(null); }}>Done early</button></div>;
+        if (rest !== null) return <div className="small muted center">Rest, then the next set.</div>;
+        if (planned.seconds !== undefined) return <button className="btn primary xl block" onClick={() => setHold({ setIdx: Math.max(0, nextIdx), left: planned.seconds! })}>▶ Start the {planned.seconds} second timer{which}</button>;
+        return <button className="btn primary xl block" onClick={() => completeSet(Math.max(0, nextIdx))}>✓ Did it{which}</button>;
+      })();
   const band = exercise.progressRule === 'band-up';
   const bandNames = settings.bandNames;
   const repsCap = band ? 60 : 40;
@@ -139,7 +159,7 @@ export function WorkoutPage() {
     <div className="player">
       <div className="row between">
         <button className="btn sm" onClick={() => nav('/today')}>‹ Today</button>
-        <div className="row"><span className={`timer small ${paused ? 'muted' : ''}`}>{fmtClock(elapsed)}</span><button className="btn sm" onClick={() => setPaused(!paused)}>{paused ? 'Resume' : 'Pause'}</button></div>
+        <div className="row"><span className={`small ${paused ? 'muted' : ''}`} style={{ fontVariantNumeric: 'tabular-nums' }}>{fmtClock(elapsed)} total</span><button className="btn sm" onClick={() => setPaused(!paused)}>{paused ? 'Resume' : 'Pause'}</button></div>
         <button className="btn sm stop-btn" onClick={() => setStopOpen(true)}>Stop</button>
       </div>
       <div className="progress-dots" aria-label={`Exercise ${index + 1} of ${session.items.length}`}>{session.items.map((it, i) => <i key={i} className={`${it.sets.some((s) => s.done) ? 'on' : ''} ${i === index ? 'now' : ''}`} />)}</div>
@@ -151,6 +171,7 @@ export function WorkoutPage() {
         {current.doseReason && <div className="small muted">{current.doseReason}</div>}
         {current.swappedFromName && <div className="small muted">In place of {current.swappedFromName}.</div>}
         <Figure pose={exercise.pose} />
+        <div className="mt">{action}</div>
         <div className="chips" style={{ marginTop: 6 }}>{exercise.cues.map((c) => <span key={c} className="cue">{c}</span>)}</div>
         <details className="fold"><summary>How to do it</summary><ol className="step-list">{exercise.steps.map((s, i) => <li key={i}>{s}</li>)}</ol>{exercise.commonErrors.length > 0 && <div className="small muted">Watch for: {exercise.commonErrors.map((e) => `${e.error.toLowerCase()} (${e.fix.toLowerCase()})`).join('; ')}</div>}</details>
         <details className="fold"><summary>Why it matters</summary><p className="small">{exercise.develops} {exercise.why}</p><Link className="small" to={`/exercises/${exercise.id}`}>Full exercise page</Link></details>
@@ -177,12 +198,11 @@ export function WorkoutPage() {
         </div>
       )}
 
-      {hold ? (
-        <div className="card center"><div className="small muted">Hold</div><div className="timer">{hold.left}</div><button className="btn mt" onClick={() => { completeSet(hold.setIdx); setHold(null); }}>Done early</button></div>
-      ) : rest !== null ? (
+      {rest !== null ? (
         <div className="card center"><div className="small muted">Rest</div><div className="timer">{rest}</div><button className="btn mt" onClick={() => setRest(null)}>Skip rest</button></div>
       ) : null}
 
+      <div className="small muted">Sets (tap one to undo)</div>
       <div className="set-row">
         {Array.from({ length: totalSets }, (_, i) => {
           const done = sets[i]?.done;
@@ -203,7 +223,7 @@ export function WorkoutPage() {
 
       <div className="row">
         <button className="btn lg" disabled={index === 0} onClick={() => go(-1)}>‹ Back</button>
-        {isLast ? <button className={`btn lg grow ${allDone ? 'primary' : ''}`} onClick={() => setFinishOpen(true)}>Finish workout</button> : <button className={`btn lg grow ${allDone ? 'primary' : ''}`} onClick={() => go(1)}>{allDone ? 'Next ›' : 'Skip to next ›'}</button>}
+        {isLast ? <button className={`btn lg grow ${allDone ? 'primary' : ''}`} onClick={() => setFinishOpen(true)}>Finish workout</button> : <button className={`btn lg grow ${allDone ? 'primary' : 'ghost'}`} onClick={() => go(1)}>{allDone ? 'Next ›' : 'Skip this one ›'}</button>}
       </div>
 
       {swapOpen && (
