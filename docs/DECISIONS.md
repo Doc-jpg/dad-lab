@@ -2,6 +2,9 @@
 
 Newest first. Append here; this is where the next session starts.
 
+## 2026-11-07 (evening), v0.1.3, the icon
+- The band-and-bar icon read as something else entirely on his phone. Replaced with a plain flexed arm (cream on slate, copper band on the forearm), the shape he suggested. iOS caches home-screen icons, so the old one stays until the app is removed from the home screen and added again.
+
 ## 2026-11-07 (evening), v0.1.2, two of his notes
 - Sunday is the first day of the week for him. The calendar and the weekly band count now run Sunday to Saturday (`weekStartOf`).
 - The water habit no longer mentions a bottle in the operatory (unsanitary, his words). It now reads: a glass before the coffee, one with every meal, and 16 ounces between meals somewhere in the day.
