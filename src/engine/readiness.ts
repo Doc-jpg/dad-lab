@@ -43,10 +43,10 @@ export function activityLoad(a: ActivityLog): number {
   return DUR[a.duration] * INT[a.intensity];
 }
 
+/** Sunday is the first day of the week here. */
 export function weekStartOf(day: Day): Day {
   const d = new Date(day + 'T12:00:00');
-  const dow = (d.getDay() + 6) % 7; // Monday = 0
-  return addDays(day, -dow);
+  return addDays(day, -d.getDay());
 }
 
 const NAMES: Record<SessionKind, string> = { push: 'Push day', pull: 'Pull day', happybody: 'Happy Body', stretch: 'Stretch', floor: 'The floor', walk: 'Walk' };

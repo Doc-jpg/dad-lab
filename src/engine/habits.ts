@@ -35,7 +35,7 @@ export const MESSAGES: Msg[] = [
   { key: 'sleep-2', category: 'sleep', text: 'Muscle is built in bed, not under the band. Seven hours is part of the program.', fit: (c) => (c.bandsToday ? 2 : 1) },
   { key: 'sleep-3', category: 'sleep', text: 'Screens off thirty minutes before bed is the cheapest sleep upgrade there is.', fit: any },
   { key: 'food-1', category: 'food', text: 'Protein at every meal, a palm of it. The rest sorts itself out more than you would think.', fit: any },
-  { key: 'food-2', category: 'food', text: 'Water first thing, before the coffee. Most afternoon tiredness is a glass of water short.', fit: any },
+  { key: 'food-2', category: 'food', text: 'Water first thing, before the coffee, and 16 ounces somewhere between meals. Most afternoon tiredness is a glass of water short.', fit: any },
   { key: 'food-3', category: 'food', text: 'The Happy Body eats on a clock: two meals and three snacks, three hours apart, the snack even when you are not hungry. Protein and about twice its weight in vegetables.', fit: any },
   { key: 'food-4', category: 'food', text: 'Nothing heavy in the two hours before bed. Sleep is better and so is the morning.', fit: any },
   { key: 'food-5', category: 'food', text: 'The book\'s pace is a pound or two a week and keep it. Faster than that is water and muscle, and it comes back.', fit: any },

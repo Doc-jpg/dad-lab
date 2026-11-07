@@ -5,7 +5,7 @@ import { refreshRewards } from '../../engine/today';
 import { addDays, type HabitKey } from '../../engine/types';
 
 const HABITS: Array<{ key: HabitKey; title: string; text: string }> = [
-  { key: 'water', title: 'Water', text: 'A glass before the coffee, one with every meal, a bottle in the operatory.' },
+  { key: 'water', title: 'Water', text: 'A glass before the coffee, one with every meal, and 16 ounces between meals somewhere in the day. A full glass in the break room between patients counts.' },
   { key: 'meals', title: 'Meals on the clock', text: 'The Happy Body way: two meals and three snacks, about three hours apart, same times each day. Protein, and about twice its weight in vegetables.' },
   { key: 'walk', title: 'A walk', text: 'Ten minutes or more, outside, phone in the pocket.' },
   { key: 'sleep', title: 'Seven hours', text: 'In bed at a time that gives seven. Screens off thirty minutes before.' },

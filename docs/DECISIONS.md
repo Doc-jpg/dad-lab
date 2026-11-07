@@ -2,6 +2,10 @@
 
 Newest first. Append here; this is where the next session starts.
 
+## 2026-11-07 (evening), v0.1.2, two of his notes
+- Sunday is the first day of the week for him. The calendar and the weekly band count now run Sunday to Saturday (`weekStartOf`).
+- The water habit no longer mentions a bottle in the operatory (unsanitary, his words). It now reads: a glass before the coffee, one with every meal, and 16 ounces between meals somewhere in the day.
+
 ## 2026-11-07 (later), v0.1.1, his real bands (Deren: "I need more bands than that. I have the Draper's Strength kit but am using them with X3 in mind")
 
 - Eight band slots instead of four; a blank name means he does not own that slot and it is skipped. Defaults are the Draper's Strength 41-inch set in its own order with the tension from the Draper's chart he keeps in Notes: Yellow 2 to 15, Red 5 to 35, Black 10 to 50, Purple 25 to 80, Green 50 to 120, Blue 60 to 150, Orange 70 to 175, and the X3 band each one stands in for from his conversion note (Purple = white, Green = light gray, Blue = dark gray, Orange = elite).

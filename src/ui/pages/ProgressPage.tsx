@@ -49,7 +49,7 @@ export function ProgressPage() {
   const monthStart = day.slice(0, 8) + '01';
   const first = new Date(monthStart + 'T12:00:00');
   const daysInMonth = new Date(first.getFullYear(), first.getMonth() + 1, 0).getDate();
-  const lead = (first.getDay() + 6) % 7;
+  const lead = first.getDay(); // Sunday first
   const cells: Array<Day | null> = [...Array.from({ length: lead }, () => null), ...Array.from({ length: daysInMonth }, (_, i) => addDays(monthStart, i))];
   const marks = (d: Day) => ({ w: bandDays.some((s) => s.day === d), f: done.some((s) => s.day === d && !STRENGTH_KINDS.includes(s.kind)), s: activity.some((l) => l.day === d), j: journal.some((j) => j.day === d) });
   const bandName = (l?: string) => (l && BANDS.includes(l as Band) ? bandShort(settings.bandNames, l as Band) : l === 'body' ? 'Body weight' : l ?? '–');
@@ -101,7 +101,7 @@ export function ProgressPage() {
       <div className="card">
         <div className="row between"><h3>{first.toLocaleDateString(undefined, { month: 'long', year: 'numeric' })}</h3><span className="tiny muted">● bands · ● other day · ● activity · ● note</span></div>
         <div className="cal mt">
-          {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((h, i) => <div key={i} className="h">{h}</div>)}
+          {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((h, i) => <div key={i} className="h">{h}</div>)}
           {cells.map((d, i) => d ? (() => { const m = marks(d); const has = m.w || m.f || m.s || m.j; return <button key={i} className={`d ${has ? 'has' : ''} ${d === day ? 'today' : ''}`} onClick={() => setPick(d)}><span>{Number(d.slice(8))}</span><span className="marks">{m.w && <i className="w" />}{m.f && <i className="f" />}{m.s && <i className="s" />}{m.j && <i className="j" />}</span></button>; })() : <div key={i} />)}
         </div>
       </div>

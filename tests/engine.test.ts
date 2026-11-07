@@ -110,10 +110,11 @@ describe('the chain', () => {
     expect(chain(s, [{ id: 'w', day: DAY, ts: '', activity: 'walk', duration: 'short', intensity: 'easy' }], DAY).length).toBe(4);
     expect(chain([sess('2026-11-05', 'push')], act, DAY).length).toBe(0);
   });
-  it('weeks start on Monday', () => {
-    expect(weekStartOf(DAY)).toBe('2026-11-09');
-    expect(weekStartOf('2026-11-09')).toBe('2026-11-09');
-    expect(weekStartOf('2026-11-15')).toBe('2026-11-09');
+  it('weeks start on Sunday', () => {
+    expect(weekStartOf(DAY)).toBe('2026-11-08');
+    expect(weekStartOf('2026-11-08')).toBe('2026-11-08');
+    expect(weekStartOf('2026-11-14')).toBe('2026-11-08');
+    expect(weekStartOf('2026-11-15')).toBe('2026-11-15');
   });
 });
 

@@ -200,7 +200,7 @@ export function TodayPage() {
       {whyOpen && readiness && (
         <Sheet title="Why this day" onClose={() => setWhyOpen(false)}>
           <ul className="why">{[...readiness.reasons, ...readiness.blockedWhy].map((r, i) => <li key={i}>{r}</li>)}</ul>
-          <p className="small muted mt">This week: {readiness.week.strengthDone} of {readiness.week.strengthTarget} band days, {readiness.week.activeDays} active days since Monday.</p>
+          <p className="small muted mt">This week (Sunday to Saturday): {readiness.week.strengthDone} of {readiness.week.strengthTarget} band days, {readiness.week.activeDays} active days so far.</p>
         </Sheet>
       )}
       {toast.el}
