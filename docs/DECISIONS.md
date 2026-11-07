@@ -2,8 +2,8 @@
 
 Newest first. Append here; this is where the next session starts.
 
-## 2026-11-07 (evening), v0.1.3, the icon
-- The band-and-bar icon read as something else entirely on his phone. Replaced with a plain flexed arm (cream on slate, copper band on the forearm), the shape he suggested. iOS caches home-screen icons, so the old one stays until the app is removed from the home screen and added again.
+## 2026-11-07 (evening), v0.1.3 and v0.1.4, the icon
+- The band-and-bar icon read as something else entirely on his phone. A hand-drawn flexed arm was worse ("wtf is this"). v0.1.4 is simply the flexed-arm emoji, rendered from Noto Color Emoji (Google's open-source emoji font, SIL Open Font License) on the slate square. Easy, as asked. iOS caches home-screen icons, so the old one stays until the app is removed from the home screen and added again.
 
 ## 2026-11-07 (evening), v0.1.2, two of his notes
 - Sunday is the first day of the week for him. The calendar and the weekly band count now run Sunday to Saturday (`weekStartOf`).
