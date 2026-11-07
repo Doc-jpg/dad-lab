@@ -2,6 +2,12 @@
 
 Newest first. Append here; this is where the next session starts.
 
+## 2026-11-07 (later), v0.1.1, his real bands (Deren: "I need more bands than that. I have the Draper's Strength kit but am using them with X3 in mind")
+
+- Eight band slots instead of four; a blank name means he does not own that slot and it is skipped. Defaults are the Draper's Strength 41-inch set in its own order with the tension from the Draper's chart he keeps in Notes: Yellow 2 to 15, Red 5 to 35, Black 10 to 50, Purple 25 to 80, Green 50 to 120, Blue 60 to 150, Orange 70 to 175, and the X3 band each one stands in for from his conversion note (Purple = white, Green = light gray, Blue = dark gray, Orange = elite).
+- Where a move starts the first time is inside the bands he owns: light (fourth slot, the Purple) for curls, triceps, pull-aparts and the overhead press; mid (Green) for the chest press and the row; heavy (Blue) for the squat, deadlift and calf raises. He picks once and it remembers. "Next band" steps through the bands he owns, skipping blanks.
+- His X3 log (screenshots) counts full reps plus partials; the player now has a partials counter on band sets and the summary shows "+n partials". The row is named "Band row (seated or bent)" since the X3 log says bent and he said seated.
+
 ## 2026-11-07, v0.1.0, first build (Deren: "I need to also get my ass in shape ... I just need to do it seven days a week, even if it's basically nothing")
 
 What he asked for: his own version of Athletic Lab, same databases and plumbing, a check-in each day (sleep and the rest), his X3-style push and pull band days (push: chest, shoulder press, triceps, squats; pull: seated rows, curls, band extensions for rear delts and posture, deadlifts, calf raises), some minimal stretching or yoga, the Happy Body book folded in, and something to do every single day because skipping a day or two is what breaks the habit for him.

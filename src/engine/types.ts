@@ -72,11 +72,21 @@ export interface Reminders {
   deviceNotifications: boolean;
 }
 
-/** The four band levels. Names are the user's (defaults are the X3 set); the keys never change. */
-export type Band = 'band1' | 'band2' | 'band3' | 'band4';
+/** Up to eight band levels, lightest to heaviest. Names are the user's; a blank name means he does not own that slot.
+ *  Defaults are the Draper's Strength 41-inch loop set in its standard color order. The keys never change. */
+export type Band = 'band1' | 'band2' | 'band3' | 'band4' | 'band5' | 'band6' | 'band7' | 'band8';
 export type Load = 'body' | Band | 'dumbbell';
-export const BANDS: Band[] = ['band1', 'band2', 'band3', 'band4'];
-export const DEFAULT_BAND_NAMES: Record<Band, string> = { band1: 'White', band2: 'Light gray', band3: 'Dark gray', band4: 'Elite' };
+export const BANDS: Band[] = ['band1', 'band2', 'band3', 'band4', 'band5', 'band6', 'band7', 'band8'];
+export const DEFAULT_BAND_NAMES: Record<Band, string> = { band1: 'Yellow (2 to 15 lb)', band2: 'Red (5 to 35 lb)', band3: 'Black (10 to 50 lb)', band4: 'Purple (25 to 80 lb, the X3 white)', band5: 'Green (50 to 120 lb, the X3 light gray)', band6: 'Blue (60 to 150 lb, the X3 dark gray)', band7: 'Orange (70 to 175 lb, the X3 elite)', band8: '' };
+/** The bands he owns, in order: every slot with a name. */
+export function activeBands(names: Record<Band, string>): Band[] {
+  return BANDS.filter((b) => (names[b] ?? '').trim().length > 0);
+}
+/** A short display name for a band: the user's word before any parenthesis. */
+export function bandShort(names: Record<Band, string>, b: Band): string {
+  const n = (names[b] ?? '').trim();
+  return n ? n.replace(/\s*\(.*$/, '') : `Band ${BANDS.indexOf(b) + 1}`;
+}
 
 export interface Settings {
   id: 'settings';
@@ -163,6 +173,8 @@ export interface Exercise {
   defaultDose: Dose;
   /** Band moves: when the top of the range is reached twice in a row, the app suggests the next band. */
   progressRule?: 'band-up' | 'reps' | 'hold' | 'none';
+  /** Where in his band set a band move starts the first time: light (third lightest), mid, or heavy. */
+  bandStart?: 'light' | 'mid' | 'heavy';
   /** Official demonstration links (opened in the browser; nothing is copied). */
   links?: Array<{ title: string; url: string }>;
   pose: Pose;
@@ -210,6 +222,8 @@ export interface SetLog {
   lbs?: number;
   /** Band work: did the set go to the point you could not do another clean rep. */
   toFailure?: boolean;
+  /** Band work: partial-range reps after the full ones, the X3 way. */
+  partials?: number;
   done: boolean;
   ts: Iso;
 }

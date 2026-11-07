@@ -36,8 +36,8 @@ export function SettingsPage() {
 
       <div className="card">
         <h3>Your bands, lightest to heaviest</h3>
-        {BANDS.map((b, i) => <input key={b} className="input mb" value={bn[b]} onChange={(e) => setBands({ ...bn, [b]: e.target.value })} onBlur={async () => { if (bands) { await saveSettings({ bandNames: bands }); setBands(null); toast.show('Saved'); } }} placeholder={`Band ${i + 1}`} />)}
-        <p className="small muted">The names are yours; the order is what matters for "next band".</p>
+        {BANDS.map((b, i) => <input key={b} className="input mb" value={bn[b]} onChange={(e) => setBands({ ...bn, [b]: e.target.value })} onBlur={async () => { if (bands) { await saveSettings({ bandNames: bands }); setBands(null); toast.show('Saved'); } }} placeholder={`Band ${i + 1} (blank if you do not have it)`} />)}
+        <p className="small muted">The order is what matters for "next band". Blank slots are skipped. Defaults are the Draper's Strength set with the X3 band each one stands in for.</p>
       </div>
 
       <div className="card">

@@ -10,7 +10,7 @@
  * Reduced day: one set each, no band up, the optional items out.
  */
 import type { Exercise, Session, SessionItem, SessionKind, WorkoutTemplate, Dose, Load, Day, LoadTag, Band, Settings } from './types';
-import { newId, nowIso, BANDS } from './types';
+import { newId, nowIso, BANDS, activeBands, bandShort } from './types';
 import type { Readiness } from './readiness';
 
 export interface BuildContext {
@@ -33,23 +33,35 @@ function lastDoneSet(item: SessionItem) {
   return done[done.length - 1];
 }
 
-/** The load used last time for this exercise, or the exercise's default. */
-export function lastLoad(exercise: Exercise, sessions: Session[]): { load: Load; lbs?: number } {
+/** Where a band move starts the first time, inside the bands he owns: light, mid or heavy. */
+export function startingBand(exercise: Exercise, names: Record<Band, string>): Band | undefined {
+  const own = activeBands(names);
+  if (!own.length) return undefined;
+  const idx = { light: 3, mid: 4, heavy: 5 }[exercise.bandStart ?? 'mid'];
+  return own[Math.min(idx, own.length - 1)];
+}
+
+/** The load used last time for this exercise, or the exercise's starting point. */
+export function lastLoad(exercise: Exercise, sessions: Session[], names: Record<Band, string> = {} as Record<Band, string>): { load: Load; lbs?: number } {
   const h = history(exercise.id, sessions);
   if (h.length) {
     const set = lastDoneSet(h[0].item);
     if (set && exercise.loads.includes(set.load)) return { load: set.load, lbs: set.lbs };
   }
+  if (exercise.progressRule === 'band-up') return { load: startingBand(exercise, names) ?? exercise.loads[0] };
   return { load: exercise.loads[0] };
 }
 
-export function bandUp(b: Load): Band | undefined {
-  const i = BANDS.indexOf(b as Band);
-  return i >= 0 && i < BANDS.length - 1 ? BANDS[i + 1] : undefined;
+/** The next heavier band he owns, or the next lighter one. */
+export function bandUp(b: Load, names?: Record<Band, string>): Band | undefined {
+  const list = names ? activeBands(names) : BANDS;
+  const i = list.indexOf(b as Band);
+  return i >= 0 && i < list.length - 1 ? list[i + 1] : undefined;
 }
-export function bandDown(b: Load): Band | undefined {
-  const i = BANDS.indexOf(b as Band);
-  return i > 0 ? BANDS[i - 1] : undefined;
+export function bandDown(b: Load, names?: Record<Band, string>): Band | undefined {
+  const list = names ? activeBands(names) : BANDS;
+  const i = list.indexOf(b as Band);
+  return i > 0 ? list[i - 1] : undefined;
 }
 
 export interface DoseDecision {
@@ -63,7 +75,7 @@ export interface DoseDecision {
 
 export function decideDose(exercise: Exercise, templateDose: Dose, ctx: BuildContext, reduced: boolean, bandNames: Record<Band, string>): DoseDecision {
   const h = history(exercise.id, ctx.sessions);
-  const { load, lbs } = lastLoad(exercise, ctx.sessions);
+  const { load, lbs } = lastLoad(exercise, ctx.sessions, bandNames);
   const dose: Dose = { ...templateDose };
   if (reduced) {
     dose.sets = 1;
@@ -75,15 +87,15 @@ export function decideDose(exercise: Exercise, templateDose: Dose, ctx: BuildCon
     const tops = recent.filter((x) => (lastDoneSet(x.item)?.reps ?? 0) >= (templateDose.repsMax ?? 40));
     const under = h[0] && lastDoneSet(h[0].item)?.load === load && (lastDoneSet(h[0].item)?.reps ?? 99) < (templateDose.reps ?? 15);
     if (recent.length >= 2 && tops.length >= 2) {
-      const up = bandUp(load);
-      if (up) return { dose, load, lbs, suggestBand: up, reason: `${templateDose.repsMax ?? 40} clean reps twice in a row with the ${bandNames[load as Band]} band. Try the ${bandNames[up]} today if it feels right.` };
+      const up = bandUp(load, bandNames);
+      if (up) return { dose, load, lbs, suggestBand: up, reason: `${templateDose.repsMax ?? 40} clean reps twice in a row with the ${bandShort(bandNames, load as Band)} band. Try the ${bandShort(bandNames, up)} today if it feels right.` };
       return { dose, load, lbs, reason: `Top band, top of the range twice. Slow the reps down instead: four seconds each way.` };
     }
     if (under) {
-      const down = bandDown(load);
-      if (down) return { dose, load: down, lbs, reason: `Under ${templateDose.reps ?? 15} reps last time with the ${bandNames[load as Band]}; the ${bandNames[down]} is on the card today.` };
+      const down = bandDown(load, bandNames);
+      if (down) return { dose, load: down, lbs, reason: `Under ${templateDose.reps ?? 15} reps last time with the ${bandShort(bandNames, load as Band)}; the ${bandShort(bandNames, down)} is on the card today.` };
     }
-    return { dose, load, lbs, reason: h.length ? `${bandNames[load as Band]} band, same as last time.` : undefined };
+    return { dose, load, lbs, reason: h.length ? `${bandShort(bandNames, load as Band)} band, same as last time.` : undefined };
   }
   if (rule === 'reps' && dose.reps !== undefined && h.length >= 2) {
     const [a, b] = h;
@@ -147,7 +159,7 @@ export function buildSession(template: WorkoutTemplate, readiness: Readiness, ct
     items.push({
       exerciseId: ex.id, exerciseName: ex.name, catalogVersion: ex.version, planned: d.dose, sets: [],
       swappedFromId: swappedFrom?.id, swappedFromName: swappedFrom?.name, doseReason: d.reason,
-      ...(d.suggestBand ? { note: `Try: ${bandNames[d.suggestBand]}` } : {})
+      ...(d.suggestBand ? { note: `Try: ${bandShort(bandNames, d.suggestBand)}` } : {})
     });
   }
   const ts = nowIso();
@@ -179,5 +191,5 @@ export function doseText(d: Dose): string {
 export function loadWord(load: Load, bandNames: Record<Band, string>, lbs?: number): string {
   if (load === 'body') return 'Body weight';
   if (load === 'dumbbell') return lbs ? `${lbs} lb dumbbells` : 'Dumbbells';
-  return `${bandNames[load as Band]} band`;
+  return `${bandShort(bandNames, load as Band)} band`;
 }

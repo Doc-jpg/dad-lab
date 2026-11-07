@@ -41,7 +41,7 @@ describe('storage', () => {
   });
 
   it('settings carry band names and the weekly target; a weigh-in replaces the same day', async () => {
-    await saveSettings({ bandNames: { band1: 'Blue', band2: 'Green', band3: 'Black', band4: 'Silver' }, strengthDaysPerWeek: 3 }, db);
+    await saveSettings({ bandNames: { band1: 'Blue', band2: 'Green', band3: 'Black', band4: 'Silver', band5: '', band6: '', band7: '', band8: '' }, strengthDaysPerWeek: 3 }, db);
     const s = await getSettings(db);
     expect(s.bandNames.band3).toBe('Black');
     expect(s.strengthDaysPerWeek).toBe(3);

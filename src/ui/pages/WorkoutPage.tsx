@@ -7,7 +7,7 @@ import { updateSession } from '../../db/db';
 import { finishSession } from '../../engine/today';
 import { lastLoad, doseText, loadWord } from '../../engine/program';
 import type { Exercise, Load, Session, SessionItem, SetLog } from '../../engine/types';
-import { nowIso, BANDS } from '../../engine/types';
+import { nowIso, BANDS, activeBands, bandShort } from '../../engine/types';
 
 /**
  * The workout player. One exercise at a time, big buttons, one tap per set, optional rest timer,
@@ -34,6 +34,7 @@ export function WorkoutPage() {
   const [load, setLoad] = useState<Load>('body');
   const [lbs, setLbs] = useState<number | undefined>(undefined);
   const [toFailure, setToFailure] = useState(false);
+  const [partials, setPartials] = useState(0);
   const [repsAdj, setRepsAdj] = useState<number | null>(null);
   const started = useRef(false);
 
@@ -76,11 +77,13 @@ export function WorkoutPage() {
 
   const current: SessionItem | undefined = session && index !== null ? session.items[index] : undefined;
   const exercise: Exercise | undefined = current ? exercises.get(current.exerciseId) : undefined;
-  const loads = useMemo(() => (exercise ? [...exercise.loads].sort((a, b) => (a === 'body' ? -1 : b === 'body' ? 1 : BANDS.indexOf(a as any) - BANDS.indexOf(b as any))) : ['body'] as Load[]), [exercise]);
+  const own = useMemo(() => activeBands(settings.bandNames), [settings.bandNames]);
+  const loads = useMemo(() => (exercise ? [...exercise.loads].filter((l) => !l.startsWith('band') || own.includes(l as any)).sort((a, b) => (a === 'body' ? -1 : b === 'body' ? 1 : BANDS.indexOf(a as any) - BANDS.indexOf(b as any))) : ['body'] as Load[]), [exercise, own]);
   useEffect(() => {
     if (!exercise) return;
-    const last = lastLoad(exercise, sessions);
+    const last = lastLoad(exercise, sessions, settings.bandNames);
     setLoad(last.load);
+    setPartials(0);
     setLbs(last.lbs);
     setToFailure(false);
     setRepsAdj(null);
@@ -106,7 +109,7 @@ export function WorkoutPage() {
     if (!session || index === null) return;
     const it = session.items[index];
     const next = [...it.sets];
-    next[setIdx] = { reps: it.planned.reps !== undefined ? (repsAdj ?? it.planned.reps) : undefined, seconds: it.planned.seconds, load, lbs: load === 'dumbbell' ? lbs : undefined, toFailure: band ? toFailure : undefined, done: true, ts: nowIso(), ...extra };
+    next[setIdx] = { reps: it.planned.reps !== undefined ? (repsAdj ?? it.planned.reps) : undefined, seconds: it.planned.seconds, load, lbs: load === 'dumbbell' ? lbs : undefined, toFailure: band ? toFailure : undefined, partials: band && partials ? partials : undefined, done: true, ts: nowIso(), ...extra };
     await patchItem(index, { sets: next });
     const total = it.planned.sets * (it.planned.perSide ? 2 : 1);
     if (next.filter((s) => s?.done).length < total && !exercise?.area.match(/warmup|mobility|breathing|happybody/)) setRest(45);
@@ -157,7 +160,8 @@ export function WorkoutPage() {
       {loads.length > 1 && (
         <div className="card">
           <div className="small muted">{band ? 'Band' : 'Load'}</div>
-          <div className="chips mt">{loads.map((l) => <button key={l} className={`chip sm ${load === l ? 'on' : ''}`} onClick={() => setLoad(l)}>{loadWord(l, bandNames)}</button>)}</div>
+          <div className="chips mt">{loads.map((l) => <button key={l} className={`chip sm ${load === l ? 'on' : ''}`} onClick={() => setLoad(l)}>{l.startsWith('band') ? bandShort(bandNames, l as any) : loadWord(l, bandNames)}</button>)}</div>
+          {band && load.startsWith('band') && (bandNames as Record<string, string>)[load]?.includes('(') && <div className="small muted mt">{(bandNames as Record<string, string>)[load]}</div>}
           {load === 'dumbbell' && <div className="row mt"><span className="small muted">Pounds each</span><div className="stepper"><button className="btn sm" onClick={() => setLbs(Math.max(1, (lbs ?? 5) - 1))}>−</button><span className="val">{lbs ?? 5}</span><button className="btn sm" onClick={() => setLbs(Math.min(60, (lbs ?? 5) + 1))}>+</button></div></div>}
         </div>
       )}
@@ -169,6 +173,7 @@ export function WorkoutPage() {
             <div className="stepper"><button className="btn sm" onClick={() => setRepsAdj(Math.max(1, (repsAdj ?? planned.reps!) - 1))}>−</button><span className="val">{repsAdj ?? planned.reps}</span><button className="btn sm" onClick={() => setRepsAdj(Math.min(repsCap, (repsAdj ?? planned.reps!) + 1))}>+</button></div>
           </div>
           {band && <div className="chips mt">{[15, 20, 25, 30, 35, 40].map((n) => <button key={n} className={`chip sm ${(repsAdj ?? planned.reps) === n ? 'on' : ''}`} onClick={() => setRepsAdj(n)}>{n}</button>)}<button className={`chip sm ${toFailure ? 'on' : ''}`} onClick={() => setToFailure(!toFailure)}>Went to failure</button></div>}
+          {band && <div className="row mt"><span className="small muted grow">Partials after the full reps (X3 style)</span><div className="stepper"><button className="btn sm" onClick={() => setPartials(Math.max(0, partials - 1))}>−</button><span className="val">+{partials}</span><button className="btn sm" onClick={() => setPartials(Math.min(30, partials + 1))}>+</button></div></div>}
         </div>
       )}
 

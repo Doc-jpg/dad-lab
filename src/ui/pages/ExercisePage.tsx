@@ -5,7 +5,7 @@ import { Figure } from '../components/Figure';
 import { AREA_WORDS } from '../../data/exercises';
 import { doseText, lastLoad, loadWord } from '../../engine/program';
 import { Spark } from '../components/Charts';
-import { BANDS, type Band } from '../../engine/types';
+import { activeBands, bandShort, type Band } from '../../engine/types';
 
 /** One move: what it builds, why it matters, how to do it, mistakes, when to skip, versions, official links, and your own history with it. */
 export function ExercisePage() {
@@ -19,7 +19,7 @@ export function ExercisePage() {
   const series = history.map((h) => { const done = h.item.sets.filter((x) => x.done); const last = done[done.length - 1]; return h.item.planned.seconds !== undefined ? Math.max(...done.map((x) => x.seconds ?? 0)) : (last?.reps ?? 0); });
   const unit = e.defaultDose.seconds !== undefined ? 'best hold (sec)' : 'reps on the last set';
   const band = e.progressRule === 'band-up';
-  const cur = lastLoad(e, sessions);
+  const cur = lastLoad(e, sessions, settings.bandNames);
   return (
     <div className="col">
       <div className="row between"><Link className="btn sm" to="/workouts">‹ Days</Link><span className="pill">{AREA_WORDS[e.area]}</span></div>
@@ -47,7 +47,7 @@ export function ExercisePage() {
         <div className="card">
           <h3>Progression</h3>
           <p className="small">{history.length ? `Last time: ${loadWord(cur.load, settings.bandNames)}, ${history[history.length - 1].item.sets.filter((x) => x.done).slice(-1)[0]?.reps ?? '–'} reps.` : 'Not done yet.'} Forty clean reps twice in a row with the same band and the next band is offered on the card. Under fifteen and the band below is on the card next time. The app never changes the band itself; you pick it each set.</p>
-          <div className="chips mt">{BANDS.map((b) => <span key={b} className={`chip sm ${cur.load === b ? 'on' : ''}`}>{settings.bandNames[b as Band]}</span>)}</div>
+          <div className="chips mt">{activeBands(settings.bandNames).map((b) => <span key={b} className={`chip sm ${cur.load === b ? 'on' : ''}`}>{bandShort(settings.bandNames, b as Band)}</span>)}</div>
         </div>
       )}
       {(e.easier || e.harder || e.substitutes.length > 0) && (
@@ -66,7 +66,7 @@ export function ExercisePage() {
           <>
             <div className="small muted mt">{history.length} session{history.length === 1 ? '' : 's'} · {unit}</div>
             <Spark values={series} labels={history.map((h) => fmtDate(h.day))} />
-            <div className="list mt">{history.slice(-5).reverse().map((h, i) => <div key={i} className="item"><div className="grow"><div className="title">{fmtDate(h.day)}</div><div className="sub">{h.item.sets.filter((x) => x.done).map((x) => (x.seconds !== undefined ? `${x.seconds}s` : `${x.reps}${x.load !== 'body' ? ` @ ${loadWord(x.load, settings.bandNames, x.lbs)}` : ''}${x.toFailure ? ' (failure)' : ''}`)).join(' · ')}{h.item.feltGood === false ? ' · did not feel great' : ''}{h.item.note ? ` · "${h.item.note}"` : ''}</div></div></div>)}</div>
+            <div className="list mt">{history.slice(-5).reverse().map((h, i) => <div key={i} className="item"><div className="grow"><div className="title">{fmtDate(h.day)}</div><div className="sub">{h.item.sets.filter((x) => x.done).map((x) => (x.seconds !== undefined ? `${x.seconds}s` : `${x.reps}${x.partials ? `+${x.partials}` : ''}${x.load !== 'body' ? ` @ ${loadWord(x.load, settings.bandNames, x.lbs)}` : ''}${x.toFailure ? ' (failure)' : ''}`)).join(' · ')}{h.item.feltGood === false ? ' · did not feel great' : ''}{h.item.note ? ` · "${h.item.note}"` : ''}</div></div></div>)}</div>
           </>
         )}
       </div>

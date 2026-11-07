@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { useAchievements, useProfile, useCheckIns, useExerciseMap, useJournal, useSessions, useActivity, useSettings, useToday, useWeighIns, fmtDate } from '../hooks';
 import { Spark, Bars } from '../components/Charts';
 import { BADGES } from '../../engine/achievements';
-import { addDays, STRENGTH_KINDS, BANDS, type Day, type Band } from '../../engine/types';
+import { addDays, STRENGTH_KINDS, BANDS, bandShort, type Day, type Band } from '../../engine/types';
 import { Sheet } from '../components/Sheet';
 import { ActivityRow } from './TodayPage';
 import { COLOR_WORDS, chain, weekStartOf } from '../../engine/readiness';
@@ -52,7 +52,7 @@ export function ProgressPage() {
   const lead = (first.getDay() + 6) % 7;
   const cells: Array<Day | null> = [...Array.from({ length: lead }, () => null), ...Array.from({ length: daysInMonth }, (_, i) => addDays(monthStart, i))];
   const marks = (d: Day) => ({ w: bandDays.some((s) => s.day === d), f: done.some((s) => s.day === d && !STRENGTH_KINDS.includes(s.kind)), s: activity.some((l) => l.day === d), j: journal.some((j) => j.day === d) });
-  const bandName = (l?: string) => (l && BANDS.includes(l as Band) ? settings.bandNames[l as Band] : l === 'body' ? 'Body weight' : l ?? '–');
+  const bandName = (l?: string) => (l && BANDS.includes(l as Band) ? bandShort(settings.bandNames, l as Band) : l === 'body' ? 'Body weight' : l ?? '–');
   const sinceStart = me ? Math.max(1, Math.round((new Date(day + 'T12:00:00').getTime() - new Date(me.programStart + 'T12:00:00').getTime()) / 86400000) + 1) : 0;
   const allDays = new Set([...done.map((s) => s.day), ...activity.map((a) => a.day)]).size;
 

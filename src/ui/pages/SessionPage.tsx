@@ -41,7 +41,7 @@ export function SessionPage() {
                 <Link key={i} className="item tappable" to={`/exercises/${it.exerciseId}`}>
                   <div className="grow">
                     <div className="title">{it.exerciseName}{it.swappedFromName ? <span className="small muted"> (instead of {it.swappedFromName})</span> : ''}</div>
-                    <div className="sub">{done.length} of {it.planned.sets * (it.planned.perSide ? 2 : 1)} sets · planned {doseText(it.planned)}{done[0]?.reps !== undefined && done.some((s) => s.reps !== it.planned.reps) ? ` · did ${done.map((s) => s.reps).join(', ')}` : ''}{loads.length ? ` · ${loads.join(', ')}` : ''}{done.some((x) => x.toFailure) ? ' · to failure' : ''}{it.feltGood === false ? ' · did not feel great' : ''}{it.note ? ` · "${it.note}"` : ''}</div>
+                    <div className="sub">{done.length} of {it.planned.sets * (it.planned.perSide ? 2 : 1)} sets · planned {doseText(it.planned)}{done[0]?.reps !== undefined && done.some((s) => s.reps !== it.planned.reps) ? ` · did ${done.map((s) => s.reps).join(', ')}` : ''}{loads.length ? ` · ${loads.join(', ')}` : ''}{done.some((x) => x.toFailure) ? ' · to failure' : ''}{done.some((x) => x.partials) ? ` · +${done.reduce((a, x) => a + (x.partials ?? 0), 0)} partials` : ''}{it.feltGood === false ? ' · did not feel great' : ''}{it.note ? ` · "${it.note}"` : ''}</div>
                   </div>
                   <span className="chev">›</span>
                 </Link>

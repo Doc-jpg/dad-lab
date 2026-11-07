@@ -121,7 +121,10 @@ describe('bands and progression', () => {
   const chest = EXERCISE_BY_ID['push-chest'];
   const ctx = (sessions: Session[]) => ({ day: DAY, exercises: exMap, sessions, settings: { bandNames: DEFAULT_BAND_NAMES } });
   it('remembers the band used last time and never changes it on its own', () => {
-    expect(lastLoad(chest, []).load).toBe('band2');
+    expect(lastLoad(chest, [], DEFAULT_BAND_NAMES).load).toBe('band5'); // chest press starts on the Green, the X3 light gray
+    expect(lastLoad(EXERCISE_BY_ID['pull-curl'], [], DEFAULT_BAND_NAMES).load).toBe('band4');
+    expect(lastLoad(EXERCISE_BY_ID['pull-deadlift'], [], DEFAULT_BAND_NAMES).load).toBe('band6');
+    expect(lastLoad(chest, [], { band1: 'A', band2: 'B', band3: '', band4: '', band5: '', band6: '', band7: '', band8: '' }).load).toBe('band2');
     expect(lastLoad(chest, [bandSession('2026-11-05', 'push-chest', 'band3', 28)]).load).toBe('band3');
     const d = decideDose(chest, chest.defaultDose, ctx([bandSession('2026-11-05', 'push-chest', 'band3', 28)]), false, DEFAULT_BAND_NAMES);
     expect(d.load).toBe('band3');
@@ -132,8 +135,10 @@ describe('bands and progression', () => {
     const d = decideDose(chest, chest.defaultDose, ctx(h), false, DEFAULT_BAND_NAMES);
     expect(d.load).toBe('band2');
     expect(d.suggestBand).toBe('band3');
-    expect(d.reason).toMatch(/Dark gray/);
-    expect(bandUp('band4')).toBeUndefined();
+    expect(d.reason).toMatch(/Black/);
+    expect(bandUp('band8')).toBeUndefined();
+    expect(bandUp('band7', DEFAULT_BAND_NAMES)).toBeUndefined(); // Orange is the heaviest he owns
+    expect(bandUp('band2', { band1: 'A', band2: 'B', band3: '', band4: 'D', band5: '', band6: '', band7: '', band8: '' })).toBe('band4'); // blank slots are skipped
   });
   it('forty once is not enough; under fifteen puts the band below on the card', () => {
     const once = decideDose(chest, chest.defaultDose, ctx([bandSession('2026-11-03', 'push-chest', 'band2', 30), bandSession('2026-11-05', 'push-chest', 'band2', 40)]), false, DEFAULT_BAND_NAMES);
@@ -148,7 +153,7 @@ describe('bands and progression', () => {
     expect(d.suggestBand).toBeUndefined();
   });
   it('the top band at the top of the range asks for slower reps instead', () => {
-    const h = [bandSession('2026-11-03', 'push-chest', 'band4', 40), bandSession('2026-11-05', 'push-chest', 'band4', 40)];
+    const h = [bandSession('2026-11-03', 'push-chest', 'band7', 40), bandSession('2026-11-05', 'push-chest', 'band7', 40)];
     const d = decideDose(chest, chest.defaultDose, ctx(h), false, DEFAULT_BAND_NAMES);
     expect(d.suggestBand).toBeUndefined();
     expect(d.reason).toMatch(/[Ss]low/);

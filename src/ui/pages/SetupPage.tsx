@@ -108,8 +108,8 @@ export function SetupPage() {
             <p className="small muted">The app never asks for more than this in a week. The other days get Happy Body, the stretch, or the five-minute floor. Change it any time in Settings.</p>
           </div>
           <div className="field"><label>Your bands, lightest to heaviest</label>
-            {BANDS.map((b, i) => <input key={b} className="input mb" value={bands[b]} onChange={(e) => setBands({ ...bands, [b]: e.target.value })} placeholder={`Band ${i + 1}`} />)}
-            <p className="small muted">Defaults are the X3 set. Call them whatever is written on yours.</p>
+            {BANDS.map((b, i) => <input key={b} className="input mb" value={bands[b]} onChange={(e) => setBands({ ...bands, [b]: e.target.value })} placeholder={`Band ${i + 1} (blank if you do not have it)`} />)}
+            <p className="small muted">Defaults are the Draper's Strength set in order, with the X3 band each one stands in for. Blank slots are skipped; rename any of them.</p>
           </div>
           <div className="field"><label>Look</label>
             <div className="btn-grid cols-3">{([['slate', 'Slate'], ['minimal', 'Minimal'], ['warm', 'Dark']] as Array<[ThemeChoice, string]>).map(([k, label]) => <button key={k} className={`theme-swatch ${theme === k ? 'on' : ''}`} onClick={() => { setTheme(k); document.documentElement.setAttribute('data-theme', k); }}>{label}</button>)}</div>

@@ -30,7 +30,7 @@ const shot = (page, name) => page.screenshot({ path: path.join(shotsDir, `${name
   await page.waitForSelector('text=About you');
   expect('name is prefilled', await page.inputValue('input[autocapitalize="words"]'), 'Deren');
   await page.click('role=button[name="4"]');
-  await page.fill('input[placeholder="Band 3"]', 'Dark gray');
+  await page.fill('input[placeholder="Band 8 (blank if you do not have it)"]', '');
   await page.click('text=Dark');
   await page.click('role=button[name="Done"]');
   await page.waitForSelector('text=Your other devices');
@@ -78,8 +78,8 @@ const shot = (page, name) => page.screenshot({ path: path.join(shotsDir, `${name
   for (let i = 0; i < total; i++) {
     await settle(120);
     const txt = await body();
-    if (/Light gray band|Dark gray band|White band/.test(txt)) sawBand = true;
-    if (/Went to failure/.test(txt)) { sawFailure = true; await page.click('role=button[name="35"]'); await page.click('text=Went to failure'); }
+    if (/Green band|Blue band|Purple band/.test(txt)) sawBand = true;
+    if (/Went to failure/.test(txt)) { sawFailure = true; await page.click('role=button[name="35"]'); await page.click('text=Went to failure'); await page.locator('.stepper').last().locator('button').last().click({ clickCount: 2 }); }
     const sets = page.locator('.set-btn:not(.done)');
     const n = await sets.count();
     for (let k = 0; k < n; k++) {
@@ -98,12 +98,12 @@ const shot = (page, name) => page.screenshot({ path: path.join(shotsDir, `${name
   await page.click('role=button[name="Finish workout"]');
   await page.waitForSelector('text=How was it?');
   await page.click('role=button[name="Okay"]');
-  await page.fill('input[placeholder*="Rows felt strong"]', 'Chest press felt strong, 35 on light gray.');
+  await page.fill('input[placeholder*="Rows felt strong"]', 'Chest press felt strong, 35 on green.');
   await page.click('role=button[name="Save workout"]');
   await page.waitForURL(/\/sessions\//);
   await settle();
   t = await body();
-  expect('session summary shows the band and failure', /Light gray band/.test(t) && /to failure/.test(t), true);
+  expect('session summary shows the band, failure and partials', /Green band|Blue band|Purple band/.test(t) && /to failure/.test(t) && /\+2 partials/.test(t), true);
   expect('milestones earned on the first day', /Day one|Checked in/.test(t), true);
   await shot(page, '04_summary');
   await page.goto(URL + '#/today');
