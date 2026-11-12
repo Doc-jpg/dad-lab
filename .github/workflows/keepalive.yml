@@ -1,0 +1,60 @@
+# Keeps the family's free Supabase project (the sync database shared by Athletic Lab, Dad Lab and
+# Dance Lab) from going dormant. Free projects pause after about a week with no traffic, whether
+# or not anyone opened an app. Deren, 2026-11-11: "make sure that doesn't happen... regardless of
+# my actual activity."
+#
+# What runs, every morning at about 8:11 AM Central:
+# 1. A real write: one heartbeat row is saved to the records table (its own family key, so it never
+#    touches anyone's data), then read back. A write plus a read is database activity, not just a
+#    page view.
+# 2. GitHub switches off scheduled jobs in a repo that has had no commits for 60 days. The last
+#    step re-enables this job through the API, which resets that clock, so it keeps running even
+#    if nobody touches the code for a year.
+# All three app repos carry this job at different hours, so any one of them is enough.
+# If a run fails, GitHub emails the repo owner. A paused project is restored with one click at
+# https://supabase.com/dashboard/project/kdulamsgpgozryacmhok
+name: Keep the sync database awake
+on:
+  schedule:
+    - cron: '11 14 * * *'
+  workflow_dispatch:
+permissions:
+  actions: write
+  contents: read
+jobs:
+  heartbeat:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Write a heartbeat row and read it back
+        env:
+          BASE: https://kdulamsgpgozryacmhok.supabase.co/rest/v1/records
+          PUB: sb_publishable_L-BWbmrV7Ss1aRJW_Et0Kg_G0EU0dtB
+          KEY: keepalive-ping-0000000000
+          FROM: dad-lab
+        run: |
+          set -u
+          fid=$(printf '%s' "$KEY" | sha256sum | cut -d' ' -f1)
+          ok=""
+          for try in 1 2 3 4; do
+            now=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+            body="{\"family_id\":\"$fid\",\"tbl\":\"keepalive\",\"id\":\"$FROM\",\"stamp\":\"$now\",\"data\":{\"from\":\"$FROM\",\"at\":\"$now\"},\"device\":\"keepalive\"}"
+            w=$(curl -s -o /dev/null -w "%{http_code}" -X POST "$BASE?on_conflict=family_id,tbl,id" \
+              -H "apikey: $PUB" -H "Authorization: Bearer $PUB" -H "x-family-key: $KEY" \
+              -H "Content-Type: application/json" -H "Prefer: resolution=merge-duplicates,return=minimal" \
+              -d "$body" || true)
+            r=$(curl -s "$BASE?select=id,stamp&tbl=eq.keepalive&id=eq.$FROM" \
+              -H "apikey: $PUB" -H "Authorization: Bearer $PUB" -H "x-family-key: $KEY" || true)
+            echo "try $try: write HTTP $w, read: $r"
+            case "$w" in 200|201|204) if echo "$r" | grep -q "$now"; then ok=1; break; fi ;; esac
+            sleep 30
+          done
+          if [ -z "$ok" ]; then
+            echo "::error::The sync database did not accept the heartbeat. It may be paused. Restore it at https://supabase.com/dashboard/project/kdulamsgpgozryacmhok"
+            exit 1
+          fi
+          echo "Heartbeat saved at $now"
+      - name: Keep this scheduled job switched on (resets the 60-day clock)
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh api -X PUT "repos/${{ github.repository }}/actions/workflows/keepalive.yml/enable" && echo "re-enabled"
